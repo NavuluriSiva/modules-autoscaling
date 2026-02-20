@@ -1,28 +1,12 @@
- resource "aws_launch_template" "this" {
-  name_prefix   = "asg-template-"
-  image_id      = var.ami_id
-  instance_type = var.instance_type
-
-  lifecycle {
-    create_before_destroy = true
+provider "aws" {
+  region     = "ap-south-1"
   }
- }
- 
- resource "aws_autoscaling_group" "this" {
+module "autoscaling" {
+  source           = "./modules/autoscaling"
+  ami_id           = var.ami_id
+  instance_type    = var.instance_type
   desired_capacity = var.desired_capacity
-  max_size         = var.max_size
   min_size         = var.min_size
-
-  vpc_zone_identifier = var.subnet_ids
-
-  launch_template {
-    id      = aws_launch_template.this.id
-    version = "$Latest"
-  }
-
-  tag {
-    key                 = "Name"
-    value               = "terraform-asg"
-    propagate_at_launch = true
-  }
+  max_size         = var.max_size
+  subnet_ids       = var.subnet_ids
 }
